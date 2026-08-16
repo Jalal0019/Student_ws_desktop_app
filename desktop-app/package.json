@@ -24,6 +24,8 @@
     },
     "files": [
       "main.js",
+      "preload.js",
+      "app-ui/**/*",
       "build/icon.png"
     ],
     "win": {

@@ -17,7 +17,11 @@ website inside its own window instead of shipping copies of the HTML.
 ## Folder contents
 ```
 desktop-app/
-├── main.js           ← creates the app window, loads your site
+├── main.js           ← creates the login + app windows, loads your site
+├── preload.js         ← securely connects the login screen to main.js
+├── app-ui/
+│   ├── login.html       ← local password screen shown before the app opens
+│   └── logo3.png         ← logo shown on the login screen
 ├── package.json       ← app metadata + build configuration
 ├── build/
 │   ├── icon.png        ← app icon (source)
@@ -26,6 +30,43 @@ desktop-app/
 └── .github/workflows/
     └── build-desktop.yml ← builds .exe and .dmg automatically on GitHub
 ```
+
+## App password
+Before the site loads, the app shows its own local password screen — this
+is separate from Google Sign-In and from your GitHub token, and just
+controls who can open the app at all.
+
+- **Default password: `bigdata2026`**
+- To set your own password, run this once with Node.js installed:
+  ```
+  node -e "console.log(require('crypto').createHash('sha256').update('YOUR_NEW_PASSWORD').digest('hex'))"
+  ```
+  Copy the printed hash, then open `main.js` and replace:
+  ```js
+  const APP_PASSWORD_HASH = null;
+  ```
+  with:
+  ```js
+  const APP_PASSWORD_HASH = 'paste the hash here';
+  ```
+  Rebuild the app (or re-run the GitHub Actions workflow) afterward for the
+  new password to take effect.
+- The password is checked as a SHA-256 hash inside `main.js` (never stored
+  or shown in plain text), but this is still only light protection — anyone
+  with the app's source files could find the password by computing hashes
+  of guesses, or by editing `main.js` to skip the check entirely. It's
+  meant to keep out casual users, not to replace the real security (your
+  GitHub token and the instructor email check) inside the website itself.
+
+## Important: Google Sign-In inside the app window
+Google actively blocks its sign-in flow inside many embedded "app" browser
+windows (it shows *"This browser or app may not be secure"*), which can
+affect Electron apps like this one. To reduce the chance of that happening,
+`main.js` sets the app window's user agent to look like a normal desktop
+Chrome browser. This works in most cases, but isn't guaranteed by Google —
+if sign-in still gets blocked after entering the app password, the safest
+fallback is opening `https://jalal0019.github.io/Student_ws/` in a normal
+browser (Chrome, Edge, Safari) instead of inside the app for that session.
 
 ## Option A (recommended): let GitHub build it for you
 You don't need a Windows or Mac computer for this — GitHub's own servers do
