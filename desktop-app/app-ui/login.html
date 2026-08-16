@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sign in — BigData Attendance</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500&display=swap');
+  :root{
+    --navy:#0b1220; --indigo:#4361EE; --gold:#F2B84B; --danger:#C62828;
+    --border:#e2e6ee; --muted:#7c8aa5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(1100px 600px at 20% -10%, #17233d, var(--navy) 55%);
+    font-family:'Inter',sans-serif; -webkit-app-region: drag;
+  }
+  .card{
+    -webkit-app-region: no-drag;
+    background:#fff; border-radius:16px; padding:40px 36px; width:340px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.35); text-align:center;
+  }
+  img{ height:56px; margin-bottom:16px; }
+  h1{ font-family:'Plus Jakarta Sans',sans-serif; font-size:1.25em; font-weight:800; color:var(--navy); margin:0 0 4px; }
+  p{ color:var(--muted); font-size:0.85em; margin:0 0 22px; line-height:1.5; }
+  input{
+    width:100%; padding:12px 14px; border-radius:8px; border:1.5px solid var(--border);
+    font-size:0.95em; margin-bottom:14px; outline:none; font-family:'Inter',sans-serif;
+    transition:border-color .2s;
+  }
+  input:focus{ border-color:var(--indigo); }
+  button{
+    width:100%; padding:12px; border:none; border-radius:8px; background:var(--indigo);
+    color:#fff; font-weight:700; font-size:0.95em; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;
+    transition:background .2s;
+  }
+  button:hover{ background:#3350D0; }
+  .error{ color:var(--danger); font-size:0.82em; margin-top:12px; min-height:16px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img src="logo3.png" alt="University of Baghdad">
+    <h1>BigData Attendance</h1>
+    <p>Enter the app password to continue.</p>
+    <input type="password" id="password" placeholder="Password" autofocus>
+    <button onclick="submitPassword()">Unlock</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById('password');
+    const errorEl = document.getElementById('error');
+
+    async function submitPassword(){
+      const ok = await window.appAuth.checkPassword(input.value);
+      if(!ok){
+        errorEl.textContent = 'Incorrect password. Try again.';
+        input.value = '';
+        input.focus();
+      }
+    }
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter') submitPassword(); });
+  </script>
+</body>
+</html>
