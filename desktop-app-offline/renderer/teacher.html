@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instructor Portal — Big Data AI Club</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+/* =============================================
+   BIG DATA AI CLUB — Modern Responsive CSS
+   Fonts: Plus Jakarta Sans + Inter
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:         #0F1F3D;
+  --indigo:       #4361EE;
+  --indigo-light: #6B83F2;
+  --indigo-pale:  #EEF2FF;
+  --gold:         #F8C200;
+  --white:        #FFFFFF;
+  --surface:      #F4F6FA;
+  --card:         #FFFFFF;
+  --border:       #E2E7F0;
+  --text-main:    #1A2340;
+  --text-muted:   #5E6E8A;
+  --shadow-sm:    0 2px 8px rgba(15,31,61,0.08);
+  --shadow-md:    0 6px 24px rgba(15,31,61,0.13);
+  --radius:       12px;
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  color: var(--text-main);
+  background: var(--surface);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 32px 24px 24px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.club-logo {
+  height: 68px;
+  max-width: 180px;
+  object-fit: contain;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+.club-logo:hover { transform: scale(1.05); opacity: 0.88; }
+
+header h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2em;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 0 0 6px;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+header h1 a { color: inherit; text-decoration: none; }
+
+/* Subtitle — always one line, ellipsis if needed */
+header p {
+  font-size: 0.97em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* ── NEWS BAR ── */
+.news-bar {
+  background: var(--indigo-pale);
+  border-bottom: 2px solid var(--indigo-light);
+}
+.news-bar-inner {
+  display: flex;
+  align-items: center;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 9px 20px;
+  gap: 12px;
+}
+
+.news-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.72em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--indigo);
+  padding: 3px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.news-slider-vertical {
+  position: relative;
+  height: 32px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+.news-slider-vertical .slide-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.news-slider-vertical .slide {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.news-slider-vertical .slide p {
+  margin: 0;
+  font-size: 0.92em;
+  font-weight: 500;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── NAVIGATION ── */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: var(--navy);
+  padding: 0 16px;
+  box-shadow: 0 4px 16px rgba(15,31,61,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px 4px;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: auto;
+}
+.nav-toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--white);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+nav a, nav .dropbtn {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  padding: 15px 14px;
+  font-size: 0.88em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.18s, background 0.18s;
+  position: relative;
+  display: inline-block;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 8px; left: 14px; right: 14px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transition: transform 0.22s ease;
+}
+nav a:hover { color: var(--white); background: rgba(255,255,255,0.08); border-radius: 6px; }
+nav a:hover::after { transform: scaleX(1); }
+nav .dropbtn:hover { color: var(--white); background: rgba(255,255,255,0.08); border-radius: 6px; }
+
+/* ── DROPDOWN ── */
+.dropdown { position: relative; }
+
+/* invisible padding bridge — mouse never leaves the element */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding-top: 6px;
+  min-width: 200px;
+  z-index: 200;
+}
+
+.dropdown-content-inner {
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(15,31,61,0.18);
+  border: 1px solid var(--border);
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 11px 18px;
+  color: var(--text-main);
+  font-size: 0.88em;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+}
+.dropdown-content a::after { display: none; }
+.dropdown-content a:hover {
+  background: var(--indigo-pale);
+  color: var(--indigo);
+  border-left-color: var(--indigo);
+}
+.dropdown:hover .dropdown-content { display: block; }
+
+/* ── SECTIONS ── */
+section {
+  max-width: 1040px;
+  margin: 36px auto;
+  padding: 36px 40px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--indigo);
+  transition: box-shadow 0.25s;
+}
+section:hover { box-shadow: var(--shadow-md); }
+
+section h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.45em;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+section h2::before {
+  content: '';
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: var(--indigo);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+section p { color: var(--text-main); line-height: 1.75; }
+
+section ul {
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+section ul li {
+  font-size: 0.96em;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-radius: 8px;
+  border-left: 3px solid var(--indigo-light);
+  transition: background 0.18s;
+  line-height: 1.5;
+}
+section ul li:hover { background: var(--indigo-pale); }
+
+/* Named section variants */
+#mission { background: linear-gradient(135deg, #F0F4FF 0%, #FAFBFF 100%); }
+#announcements { border-left-color: var(--gold); }
+#announcements h2::before { background: var(--gold); }
+
+/* Empty state for activity pages */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+.empty-state svg { margin-bottom: 14px; opacity: 0.35; }
+.empty-state p { font-size: 0.97em; }
+
+/* ── FORMS ── */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  margin-top: 8px;
+}
+
+form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.88em;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+form input[type="text"],
+form input[type="email"],
+form textarea,
+form select {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95em;
+  color: var(--text-main);
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+form input:focus, form textarea:focus, form select:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(67,97,238,0.12);
+}
+form input::placeholder, form textarea::placeholder { color: #B0BCD0; }
+form textarea { min-height: 130px; resize: vertical; line-height: 1.6; }
+form select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235E6E8A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+form input[type="file"] {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88em;
+  color: var(--text-muted);
+  transition: border-color 0.2s, background 0.2s;
+}
+form input[type="file"]:hover { border-color: var(--indigo); background: var(--indigo-pale); }
+
+form button[type="submit"],
+form input[type="submit"] {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95em;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--indigo);
+  border: none;
+  border-radius: 8px;
+  padding: 13px 32px;
+  cursor: pointer;
+  align-self: flex-start;
+  box-shadow: 0 4px 14px rgba(67,97,238,0.3);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  letter-spacing: 0.02em;
+}
+form button[type="submit"]:hover,
+form input[type="submit"]:hover {
+  background: #3350D0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(67,97,238,0.38);
+}
+form button[type="submit"]:active { transform: translateY(0); }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 28px 24px;
+  background: var(--navy);
+  color: rgba(255,255,255,0.65);
+  font-size: 0.86em;
+  margin-top: 52px;
+  line-height: 1.9;
+}
+footer strong { color: rgba(255,255,255,0.92); font-weight: 600; }
+
+/* ── RESPONSIVE: Tablet ── */
+@media (max-width: 900px) {
+  section { margin: 24px 20px; padding: 28px 26px; }
+  header h1 { font-size: 1.7em; }
+}
+
+/* ── RESPONSIVE: Mobile ── */
+@media (max-width: 768px) {
+  header { padding: 24px 20px 18px; }
+  header h1 { font-size: 1.35em; }
+  header p { font-size: 0.85em; }
+  .club-logo { height: 52px; max-width: 130px; }
+  .logo-container { gap: 16px; margin-bottom: 10px; }
+
+  .nav-toggle { display: flex; }
+
+  nav {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 0;
+    justify-content: flex-start;
+  }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .nav-links.open { display: flex; }
+
+  nav a, nav .dropbtn {
+    width: 100%;
+    text-align: left;
+    padding: 13px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-radius: 0;
+    font-size: 0.93em;
+  }
+  nav a::after { display: none; }
+
+  /* Mobile dropdown inline */
+  .dropdown-content {
+    position: static;
+    display: none;
+    padding-top: 0;
+  }
+  .dropdown-content-inner {
+    background: rgba(0,0,0,0.18);
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+  .dropdown.open .dropdown-content { display: block; }
+  .dropdown-content a {
+    color: rgba(255,255,255,0.8);
+    background: transparent;
+    border-left: none;
+    padding-left: 36px;
+    font-size: 0.88em;
+  }
+  .dropdown-content a:hover { background: rgba(255,255,255,0.08); color: var(--white); border-left-color: transparent; }
+
+  .news-bar-inner { flex-direction: row; padding: 8px 14px; gap: 10px; }
+  .news-slider-vertical { height: 28px; }
+  .news-slider-vertical .slide { height: 28px; }
+  .news-slider-vertical .slide p { font-size: 0.85em; }
+
+  section { margin: 16px 12px; padding: 22px 18px; }
+  section h2 { font-size: 1.2em; }
+
+  form button[type="submit"],
+  form input[type="submit"] { width: 100%; text-align: center; align-self: stretch; }
+}
+
+/* ── RESPONSIVE: Small Mobile ── */
+@media (max-width: 480px) {
+  header h1 { font-size: 1.15em; }
+  header p { font-size: 0.8em; }
+  .club-logo { height: 44px; max-width: 100px; }
+  .logo-container { gap: 12px; }
+  section { margin: 10px 8px; padding: 16px 14px; }
+  section h2 { font-size: 1.05em; }
+  footer { font-size: 0.78em; padding: 22px 16px; }
+}
+
+/* ── ACCESSIBILITY ── */
+a:focus-visible, button:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+/* =============================================
+   DASHBOARD EXTRAS — built on the club's design tokens
+   (navy / indigo / gold — Plus Jakarta Sans + Inter)
+   ============================================= */
+
+/* ── Auth top bar (identical pattern to club site) ── */
+.auth-topbar {
+  background: var(--navy);
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 0.82em;
+  min-height: 38px;
+}
+.auth-topbar .not-signed { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.55); }
+.auth-topbar .signed-in { display: none; align-items: center; gap: 10px; }
+.tb-signin-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.9);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.18s, border-color 0.18s;
+}
+.tb-signin-btn:hover { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.4); }
+.tb-signin-btn img { width: 14px; height: 14px; }
+.auth-topbar img.avatar { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.35); }
+.auth-topbar .tb-name { color: rgba(255,255,255,0.92); font-weight: 600; }
+.auth-topbar .tb-role { font-size: 0.78em; font-weight: 700; padding: 2px 9px; border-radius: 20px; letter-spacing: 0.05em; }
+.tb-signout {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px; color: rgba(255,255,255,0.75); padding: 3px 10px; cursor: pointer;
+  font-size: 0.82em; font-family: inherit; transition: background 0.18s, color 0.18s;
+}
+.tb-signout:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+.tb-popup-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(10,16,32,0.6); z-index: 9998;
+  align-items: flex-start; justify-content: flex-end; padding-top: 42px; padding-right: 24px;
+}
+.tb-popup-overlay.open { display: flex; }
+.tb-popup { background: #fff; border-radius: 12px; padding: 28px 28px 24px; width: 300px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); text-align: center; animation: popIn 0.2s ease; position: relative; }
+@keyframes popIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.tb-popup h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1em; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
+.tb-popup p { font-size: 0.82em; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+.tb-google-btn {
+  display: inline-flex; align-items: center; gap: 10px; background: #fff; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 10px 20px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92em; font-weight: 600; color: var(--text-main); cursor: pointer; width: 100%; justify-content: center;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.tb-google-btn:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); border-color: #aaa; }
+.tb-google-btn img { width: 18px; height: 18px; }
+.tb-popup-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 1.3em; cursor: pointer; color: #888; line-height: 1; }
+.tb-spinner { display: none; width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--indigo); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 12px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.center-modal { display:none; position:fixed; inset:0; background:rgba(10,16,32,0.85); z-index:99999; align-items:center; justify-content:center; padding:20px; }
+.center-modal.open { display:flex; }
+.center-modal-box { background:#fff; border-radius:14px; max-width:420px; width:100%; padding:36px 32px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:popIn 0.25s ease; }
+
+/* ── Dashboard shell ── */
+.dash-main { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 20px; display:flex; align-items:center; gap:14px;
+  border-left: 4px solid var(--indigo);
+}
+.stat-icon { font-size: 1.6em; width:48px; height:48px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:var(--indigo-pale); flex-shrink:0; }
+.stat-card h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.5em; font-weight:800; color:var(--navy); margin:0; }
+.stat-card p { font-size:0.85em; color:var(--text-muted); margin:0; }
+
+.tabs-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.tab-btn {
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9em; font-weight:700;
+  padding:10px 20px; border-radius:8px; border:1.5px solid var(--border);
+  background:var(--white); color:var(--text-muted); cursor:pointer; transition:all .18s;
+}
+.tab-btn:hover { border-color:var(--indigo); color:var(--indigo); }
+.tab-btn.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+
+.dash-panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:28px; margin-bottom:24px; border-left:4px solid var(--indigo); }
+.dash-panel h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.2em; font-weight:800; color:var(--navy); margin:0 0 16px; display:flex; align-items:center; gap:10px; }
+.dash-panel h2::before { content:''; width:7px; height:7px; background:var(--indigo); border-radius:50%; flex-shrink:0; }
+
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:860px){ .grid-2 { grid-template-columns:1fr; } }
+
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+@media(max-width:560px){ .field-row { grid-template-columns:1fr; } }
+
+.dash-panel input, .dash-panel select {
+  font-family:'Inter',sans-serif; font-size:0.92em; color:var(--text-main); background:#fff;
+  border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; width:100%; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.dash-panel input:focus, .dash-panel select:focus { border-color:var(--indigo); box-shadow:0 0 0 3px rgba(67,97,238,0.12); }
+.dash-panel label { display:block; font-size:0.82em; font-weight:600; color:var(--navy); margin-bottom:6px; }
+
+.btn { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:0.9em; border:none; border-radius:8px; padding:11px 22px; cursor:pointer; transition:background .2s, transform .15s, box-shadow .2s; }
+.btn-primary { color:#fff; background:var(--indigo); box-shadow:0 4px 14px rgba(67,97,238,0.3); }
+.btn-primary:hover { background:#3350D0; transform:translateY(-1px); }
+.btn-gold { color:var(--navy); background:var(--gold); }
+.btn-gold:hover { transform:translateY(-1px); }
+.btn-danger { color:#fff; background:#C62828; }
+.btn-danger:hover { background:#B71C1C; }
+.btn-ghost { color:var(--navy); background:var(--surface); border:1.5px solid var(--border); }
+.btn-ghost:hover { border-color:var(--indigo); color:var(--indigo); }
+.btn-sm { padding:6px 12px; font-size:0.8em; }
+
+.badge-role { display:inline-block; font-size:0.72em; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:0.05em; }
+.badge-admin { background:#1A2340; color:var(--gold); border:1px solid var(--gold); }
+.badge-professor { background:#FFF8EC; color:#9a6f00; }
+.badge-student { background:var(--indigo-pale); color:var(--indigo); }
+
+/* ── Excel-style tables ── */
+.table-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:10px; }
+table.grid-table { width:100%; border-collapse:collapse; font-size:0.86em; min-width:520px; }
+table.grid-table th, table.grid-table td { padding:9px 12px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+table.grid-table thead th { background:var(--surface); color:var(--navy); font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:0.82em; position:sticky; top:0; }
+table.grid-table tbody tr:hover { background:var(--indigo-pale); }
+table.grid-table td.sticky-col { position:sticky; left:0; background:#fff; font-weight:600; }
+table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.85em; border:1.5px solid var(--border); border-radius:6px; width:100%; min-width:90px; }
+
+.status-present { color:#2E7D32; font-weight:700; }
+.status-absent { color:#C62828; font-weight:700; }
+.status-late { color:#9a6f00; font-weight:700; }
+
+.status-msg { font-family:'Inter',sans-serif; font-size:0.85em; margin-top:10px; min-height:18px; }
+.status-msg.ok { color:#2E7D32; }
+.status-msg.err { color:#C62828; }
+
+.empty-hint { text-align:center; padding:30px 16px; color:var(--text-muted); font-size:0.9em; }
+
+.access-gate { max-width:440px; margin:80px auto; text-align:center; padding:0 20px; }
+.access-gate img.club-logo-lg { height:70px; margin-bottom:18px; }
+.access-gate h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.5em; font-weight:800; color:var(--navy); margin-bottom:8px; }
+.access-gate p.sub { color:var(--text-muted); font-size:0.95em; margin-bottom:26px; }
+
+    nav a[href="teacher.html"] { color:#fff; }
+    nav a[href="teacher.html"]::after { transform:scaleX(1); }
+  </style>
+</head>
+<body>
+  <!-- AUTH TOP BAR -->
+  <div class="auth-topbar">
+    <div class="signed-in" id="tbSignedIn" style="display:flex;">
+      <span class="tb-role badge-role badge-admin">Offline — saved on this computer</span>
+      <button class="tb-signout" onclick="backupData()">Backup…</button>
+      <button class="tb-signout" onclick="restoreData()">Restore…</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <a href="https://uobaghdad.edu.iq/" target="_blank">
+        <img src="logo3.png" alt="University of Baghdad Logo" class="club-logo" style="height:65px;width:65px;object-fit:contain;">
+      </a>
+      <a href="https://en.coai.uobaghdad.edu.iq/" target="_blank">
+        <img src="coai-english-logo.png" alt="College of AI Logo" class="club-logo" style="height:80px;width:auto;object-fit:contain;">
+      </a>
+    </div>
+    <h1><a href="index.html">Instructor Portal</a></h1>
+    <p>Courses, Attendance &amp; Gradebook — Big Data AI Club</p>
+  </header>
+
+  <nav>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="teacher.html">Instructor</a>
+      <a href="profiles.html">Profiles</a>
+    </div>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <main class="dash-main" id="dashboard">
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">📖</div><div><h3 id="statCourses">0</h3><p>Courses</p></div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div><h3 id="statStudents">0</h3><p>Students</p></div></div>
+    </div>
+
+    <div class="tabs-row">
+      <button class="tab-btn active" data-tab="roster" onclick="switchTab('roster')">Courses &amp; Students</button>
+      <button class="tab-btn" data-tab="attendance" onclick="switchTab('attendance')">Attendance</button>
+      <button class="tab-btn" data-tab="grades" onclick="switchTab('grades')">Gradebook</button>
+    </div>
+
+    <div class="tab-panel" id="tab-roster">
+      <div class="dash-panel">
+        <h2>Semester</h2>
+        <div class="field-row">
+          <div><label>Current semester (used when creating a course)</label>
+            <div style="display:flex; gap:8px;">
+              <input id="newSemesterName" placeholder="Fall 2026" list="semesterOptions">
+              <datalist id="semesterOptions"></datalist>
+              <button class="btn btn-gold btn-sm" onclick="setActiveSemester()">Set</button>
+            </div>
+          </div>
+          <div><label>Filter everything by semester</label><select id="semesterFilter" onchange="onSemesterFilterChange()"><option value="">All semesters</option></select></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="dash-panel">
+          <h2>Create course</h2>
+          <div class="field-row">
+            <div><label>Course code</label><input id="courseCode" placeholder="AICI201"></div>
+            <div><label>Course title</label><input id="courseName" placeholder="Object-Oriented Programming"></div>
+          </div>
+          <p style="font-size:0.78em; color:var(--text-muted); margin:-4px 0 10px;">New course will be added to semester: <strong id="activeSemesterLabel">(none set)</strong></p>
+          <button class="btn btn-primary" onclick="addCourse()">Add course</button>
+          <div class="status-msg" id="courseStatus"></div>
+          <div class="table-wrap" style="margin-top:16px;">
+            <table class="grid-table"><thead><tr><th>Code</th><th>Title</th><th>Semester</th><th></th></tr></thead><tbody id="coursesList"></tbody></table>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="saveCourses()">Save courses</button>
+        </div>
+
+        <div class="dash-panel">
+          <h2>Enroll students</h2>
+          <div class="tabs-row" style="margin-bottom:14px;">
+            <button class="tab-btn active" type="button" data-subtab="single" onclick="switchEnrollMode('single')">Add one</button>
+            <button class="tab-btn" type="button" data-subtab="bulk" onclick="switchEnrollMode('bulk')">Paste from Excel</button>
+          </div>
+          <div id="enrollSingle">
+            <div class="field-row">
+              <div><label>Student ID</label><input id="studentId" placeholder="20231045"></div>
+              <div><label>Full name</label><input id="studentName" placeholder="Student name"></div>
+            </div>
+            <div class="field-row">
+              <div><label>University email</label><input id="studentEmail" type="email" placeholder="name@uobaghdad.edu.iq"></div>
+              <div><label>Course</label><select id="studentCourse"></select></div>
+            </div>
+            <button class="btn btn-primary" onclick="addStudent()">Enroll student</button>
+          </div>
+          <div id="enrollBulk" style="display:none;">
+            <label>Course for this batch</label>
+            <select id="bulkCourse" style="margin-bottom:14px;"></select>
+            <label>Paste rows copied from Excel (columns: Name, ID, Email — email optional)</label>
+            <textarea id="bulkPaste" rows="6" placeholder="Ali Hassan&#9;20231001&#9;ali.hassan@uobaghdad.edu.iq&#10;Sara Kadhim&#9;20231002&#9;sara.kadhim@uobaghdad.edu.iq" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:0.85em; border:1.5px solid var(--border); border-radius:8px; padding:10px 12px; resize:vertical; margin-bottom:10px;"></textarea>
+            <p style="font-size:0.78em; color:var(--text-muted); margin-bottom:12px;">Select the Name + ID (+ Email) columns in Excel, copy (Ctrl+C), then paste directly into the box above — one student per line.</p>
+            <button class="btn btn-primary" onclick="bulkEnroll()">Add all pasted students</button>
+          </div>
+          <div class="status-msg" id="studentStatus"></div>
+          <div class="actions" style="margin-top:14px;">
+            <button class="btn btn-ghost btn-sm" onclick="saveStudents()">Save students</button>
+            <a href="profiles.html" class="btn btn-gold btn-sm" style="text-decoration:none;">View student profiles →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-attendance" style="display:none;">
+      <div class="dash-panel">
+        <h2>Attendance sheet</h2>
+        <div class="field-row">
+          <div><label>Course</label><select id="attCourse" onchange="renderAttendance()"></select></div>
+          <div>
+            <label>Add a new session date</label>
+            <div style="display:flex; gap:8px;">
+              <input id="attNewDate" type="date" style="flex:1;">
+              <button class="btn btn-gold btn-sm" onclick="addSessionDate()">+ Add column</button>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:0.78em; color:var(--text-muted); margin:-4px 0 14px;">Click a cell to cycle Present → Absent → Late, just like entering 1/0 in Excel. Totals and % update automatically.</p>
+        <div class="table-wrap">
+          <table class="grid-table" id="attGridTable">
+            <thead><tr id="attHeadRow"></tr></thead>
+            <tbody id="attBody"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary" style="margin-top:14px;" onclick="saveAttendance()">Save attendance</button>
+        <div class="status-msg" id="attStatus"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-grades" style="display:none;">
+      <div class="dash-panel">
+        <h2>Gradebook</h2>
+        <div class="field-row">
+          <div><label>Course</label><select id="gradeCourse" onchange="renderGrades()"></select></div>
+          <div>
+            <label>Add a new assessment column</label>
+            <div style="display:flex; gap:8px;">
+              <input id="gradeNewName" placeholder="Quiz 1" style="flex:1;">
+              <button class="btn btn-gold btn-sm" onclick="addAssessmentColumn()">+ Add</button>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:0.78em; color:var(--text-muted); margin:-4px 0 14px;">Type scores directly into the grid (each cell 0–100) — just like the yellow cells in your Excel gradebook. Total is the sum of that student's scores and updates automatically.</p>
+        <div class="table-wrap">
+          <table class="grid-table" id="gradeGridTable">
+            <thead><tr id="gradeHeadRow"></tr></thead>
+            <tbody id="gradeBody"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary" style="margin-top:14px;" onclick="saveGrades()">Save grades</button>
+        <div class="status-msg" id="gradeStatus"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>&copy; <span id="footerYear">2026</span> <strong>Big Data Artificial Intelligence Club</strong> | Students Scientific Community</p>
+    <p>Big Data Department | College of AI | University of Baghdad</p>
+  </footer>
+
+  <script>
+    let courses = [], students = [], attendance = {}, grades = {};
+
+    window.onload = async function(){
+      document.getElementById('attNewDate').valueAsDate = new Date();
+      const data = await window.localData.load();
+      courses = data.courses; students = data.students;
+      attendance = data.attendance; grades = data.grades;
+      renderRoster();
+    };
+
+    async function saveAll(){
+      await window.localData.save({ courses, students, attendance, grades });
+    }
+
+    window.backupData = async () => {
+      const result = await window.localData.backup();
+      if(result && result.ok){
+        alert('Backup saved to:\n' + result.filePath);
+      }
+    };
+    window.restoreData = async () => {
+      if(!confirm('Restoring a backup will replace ALL current data on this computer. Continue?')) return;
+      const result = await window.localData.restore();
+      if(result && result.ok){
+        courses = result.data.courses; students = result.data.students;
+        attendance = result.data.attendance; grades = result.data.grades;
+        renderRoster();
+        alert('Data restored successfully.');
+      }
+    };
+
+    function setStatus(id, msg, ok){
+      const el = document.getElementById(id);
+      el.textContent = msg; el.className = 'status-msg ' + (ok===true?'ok':ok===false?'err':'');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(t=>{
+      if(!t.dataset.tab) return; // skip other pill-button groups, e.g. the enroll mode toggle
+      t.onclick = ()=>{
+        document.querySelectorAll('.tab-btn[data-tab]').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(x=>x.style.display='none');
+        t.classList.add('active');
+        document.getElementById('tab-'+t.dataset.tab).style.display='block';
+      };
+    });
+    window.switchTab = (name) => document.querySelector(`.tab-btn[data-tab="${name}"]`).click();
+
+    let activeSemester = '';
+
+    function distinctSemesters(){
+      return [...new Set(courses.map(c=>c.semester).filter(Boolean))].sort();
+    }
+    window.setActiveSemester = () => {
+      const val = document.getElementById('newSemesterName').value.trim();
+      if(!val) return;
+      activeSemester = val;
+      document.getElementById('activeSemesterLabel').textContent = val;
+      renderRoster();
+    };
+    window.onSemesterFilterChange = () => { renderRoster(); };
+    function filteredCourses(){
+      const f = document.getElementById('semesterFilter').value;
+      return f ? courses.filter(c=>c.semester===f) : courses;
+    }
+    function courseSelectOptions(){
+      const list = filteredCourses();
+      return list.map(c=>`<option value="${c.code}">${c.code} — ${c.name}</option>`).join('') || '<option value="">Add a course first</option>';
+    }
+    function renderRoster(){
+      document.getElementById('statCourses').textContent = courses.length;
+      document.getElementById('statStudents').textContent = students.length;
+
+      const sems = distinctSemesters();
+      document.getElementById('semesterOptions').innerHTML = sems.map(s=>`<option value="${s}">`).join('');
+      const semFilter = document.getElementById('semesterFilter'); const semFilterCur = semFilter.value;
+      semFilter.innerHTML = '<option value="">All semesters</option>' + sems.map(s=>`<option value="${s}">${s}</option>`).join('');
+      if(sems.includes(semFilterCur)) semFilter.value = semFilterCur;
+      document.getElementById('activeSemesterLabel').textContent = activeSemester || '(none set)';
+
+      document.getElementById('coursesList').innerHTML = filteredCourses().map((c)=>{
+        const i = courses.indexOf(c);
+        return `<tr><td>${c.code}</td><td>${c.name}</td><td>${c.semester||'—'}</td><td><button class="btn btn-danger btn-sm" onclick="removeCourse(${i})">Delete</button></td></tr>`;
+      }).join('') || '<tr><td colspan="4" class="empty-hint">No courses yet.</td></tr>';
+
+      ['studentCourse','bulkCourse','attCourse','gradeCourse'].forEach(id=>{
+        const el = document.getElementById(id); const cur = el.value;
+        el.innerHTML = courseSelectOptions();
+        if(filteredCourses().some(c=>c.code===cur)) el.value = cur;
+      });
+      renderAttendance(); renderGrades();
+    }
+
+    window.addCourse = () => {
+      const code = document.getElementById('courseCode').value.trim();
+      const name = document.getElementById('courseName').value.trim();
+      if(!code || !name){ setStatus('courseStatus','Fill in both fields.', false); return; }
+      if(courses.some(c=>c.code===code)){ setStatus('courseStatus','This code already exists.', false); return; }
+      courses.push({code, name, semester: activeSemester || ''});
+      document.getElementById('courseCode').value=''; document.getElementById('courseName').value='';
+      setStatus('courseStatus','Added — click "Save courses" to keep it.', true);
+      renderRoster();
+    };
+    window.removeCourse = (i) => { courses.splice(i,1); renderRoster(); };
+    window.saveCourses = async () => {
+      try{ setStatus('courseStatus','Saving...'); await saveAll(); setStatus('courseStatus','Saved.', true); }
+      catch(e){ setStatus('courseStatus', e.message, false); }
+    };
+
+    window.addStudent = () => {
+      const id = document.getElementById('studentId').value.trim();
+      const name = document.getElementById('studentName').value.trim();
+      const email = document.getElementById('studentEmail').value.trim().toLowerCase();
+      const courseCode = document.getElementById('studentCourse').value;
+      if(!id || !name || !email || !courseCode){ setStatus('studentStatus','Fill in all fields.', false); return; }
+      if(students.some(s=>s.id===id)){ setStatus('studentStatus','This ID already exists.', false); return; }
+      if(students.some(s=>s.email===email)){ setStatus('studentStatus','This email is already used.', false); return; }
+      students.push({id, name, email, courseCode});
+      document.getElementById('studentId').value=''; document.getElementById('studentName').value=''; document.getElementById('studentEmail').value='';
+      setStatus('studentStatus','Added — click "Save students" to keep it.', true);
+      renderRoster();
+    };
+    window.removeStudent = (id) => {
+      const i = students.findIndex(s=>s.id===id);
+      if(i>-1){ students.splice(i,1); renderRoster(); }
+    };
+    window.saveStudents = async () => {
+      try{ setStatus('studentStatus','Saving...'); await saveAll(); setStatus('studentStatus','Saved.', true); }
+      catch(e){ setStatus('studentStatus', e.message, false); }
+    };
+
+    window.switchEnrollMode = (mode) => {
+      document.querySelectorAll('#tab-roster .tabs-row .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.subtab===mode));
+      document.getElementById('enrollSingle').style.display = mode==='single' ? 'block' : 'none';
+      document.getElementById('enrollBulk').style.display = mode==='bulk' ? 'block' : 'none';
+    };
+
+    window.bulkEnroll = () => {
+      const courseCode = document.getElementById('bulkCourse').value;
+      const raw = document.getElementById('bulkPaste').value;
+      if(!courseCode){ setStatus('studentStatus','Choose a course for this batch first.', false); return; }
+      if(!raw.trim()){ setStatus('studentStatus','Paste some rows first.', false); return; }
+      const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
+      let added = 0, skipped = 0;
+      lines.forEach(line=>{
+        // Accept tab or comma separated: Name, ID, Email
+        const parts = line.split('\t').length > 1 ? line.split('\t') : line.split(',');
+        const cells = parts.map(p=>p.trim()).filter(p=>p!=='');
+        if(cells.length < 2){ skipped++; return; }
+        // Figure out which cell is the ID (all-digits or alnum id-like) vs name
+        let name, id, email='';
+        const idLike = cells.find(c=>/^[A-Za-z0-9\-]+$/.test(c) && /\d/.test(c) && !c.includes('@'));
+        const emailLike = cells.find(c=>c.includes('@'));
+        if(idLike){ id = idLike; name = cells.find(c=>c!==idLike && c!==emailLike) || cells[0]; }
+        else { name = cells[0]; id = cells[1]; }
+        if(emailLike) email = emailLike.toLowerCase();
+        if(!name || !id){ skipped++; return; }
+        if(students.some(s=>s.id===id)){ skipped++; return; }
+        students.push({ id, name, email, courseCode });
+        added++;
+      });
+      document.getElementById('bulkPaste').value = '';
+      setStatus('studentStatus', `Added ${added} student(s)${skipped?`, skipped ${skipped} row(s)`:''} — click "Save students" to keep them.`, added>0);
+      renderRoster();
+    };
+
+    // ---------- Attendance grid ----------
+    function sessionDatesFor(code){
+      return Object.keys(attendance[code] || {}).sort();
+    }
+    window.addSessionDate = () => {
+      const code = document.getElementById('attCourse').value;
+      const date = document.getElementById('attNewDate').value;
+      if(!code){ setStatus('attStatus','Choose a course first.', false); return; }
+      if(!date){ setStatus('attStatus','Pick a date first.', false); return; }
+      if(!attendance[code]) attendance[code] = {};
+      if(!attendance[code][date]) attendance[code][date] = {};
+      document.getElementById('attNewDate').value = '';
+      renderAttendance();
+    };
+    window.deleteSessionDate = (date) => {
+      const code = document.getElementById('attCourse').value;
+      if(!code || !attendance[code]) return;
+      if(!confirm(`Delete the ${date} session for this course? This removes attendance for all students on that date.`)) return;
+      delete attendance[code][date];
+      renderAttendance();
+    };
+    window.renderAttendance = () => {
+      const code = document.getElementById('attCourse').value;
+      const roster = students.filter(s=>s.courseCode===code);
+      const dates = sessionDatesFor(code);
+      const head = document.getElementById('attHeadRow');
+      head.innerHTML = '<th class="sticky-col">Student</th>' + dates.map(d=>
+        `<th>${d} <button type="button" title="Delete this session" onclick="deleteSessionDate('${d}')" style="border:none;background:none;color:#C62828;cursor:pointer;font-weight:800;padding:0 0 0 4px;">×</button></th>`
+      ).join('') + '<th>Present</th><th>Absent</th><th>%</th>';
+      if(!roster.length || !dates.length){
+        document.getElementById('attBody').innerHTML = `<tr><td colspan="${dates.length+4}" class="empty-hint">${!roster.length?'No students in this course.':'Add a session date to start.'}</td></tr>`;
+        return;
+      }
+      document.getElementById('attBody').innerHTML = roster.map(s=>{
+        let present=0, absent=0, late=0;
+        const cells = dates.map(d=>{
+          const st = (attendance[code][d] && attendance[code][d][s.id]) || 'present';
+          if(st==='present') present++; else if(st==='absent') absent++; else late++;
+          const cls = 'status-'+st, label = st==='present'?'P':st==='absent'?'A':'L';
+          return `<td><button type="button" class="attCell status-${st}" data-sid="${s.id}" data-date="${d}" onclick="cycleAttendance(this)" style="border:none;background:none;font-weight:800;cursor:pointer;width:100%;">${label}</button></td>`;
+        }).join('');
+        const total = present+absent+late;
+        const pct = total ? Math.round(present*100/total) : 0;
+        return `<tr><td class="sticky-col">${s.name} <small style="color:var(--text-muted)">(${s.id})</small></td>${cells}<td>${present}</td><td>${absent+late}</td><td>${pct}%</td></tr>`;
+      }).join('');
+    };
+    window.cycleAttendance = (btn) => {
+      const code = document.getElementById('attCourse').value;
+      const sid = btn.dataset.sid, date = btn.dataset.date;
+      const order = ['present','absent','late'];
+      const cur = (attendance[code][date] && attendance[code][date][sid]) || 'present';
+      const next = order[(order.indexOf(cur)+1) % order.length];
+      if(!attendance[code][date]) attendance[code][date] = {};
+      attendance[code][date][sid] = next;
+      renderAttendance();
+    };
+    window.saveAttendance = async () => {
+      const code = document.getElementById('attCourse').value;
+      if(!code){ setStatus('attStatus','Choose a course first.', false); return; }
+      try{ setStatus('attStatus','Saving...'); await saveAll(); setStatus('attStatus','Saved.', true); }
+      catch(e){ setStatus('attStatus', e.message, false); }
+    };
+
+    // ---------- Gradebook grid ----------
+    function assessmentsFor(code){
+      const names = new Set();
+      const courseGrades = grades[code] || {};
+      Object.values(courseGrades).forEach(entries => Object.keys(entries).forEach(n=>names.add(n)));
+      return [...names];
+    }
+    window.addAssessmentColumn = () => {
+      const code = document.getElementById('gradeCourse').value;
+      const name = document.getElementById('gradeNewName').value.trim();
+      const max = 100;
+      if(!code){ setStatus('gradeStatus','Choose a course first.', false); return; }
+      if(!name){ setStatus('gradeStatus','Name the assessment first.', false); return; }
+      if(!grades[code]) grades[code] = {};
+      const roster = students.filter(s=>s.courseCode===code);
+      roster.forEach(s=>{
+        if(!grades[code][s.id]) grades[code][s.id] = {};
+        if(!grades[code][s.id][name]) grades[code][s.id][name] = { score: 0, max };
+      });
+      document.getElementById('gradeNewName').value = '';
+      renderGrades();
+    };
+    window.deleteAssessmentColumn = (name) => {
+      const code = document.getElementById('gradeCourse').value;
+      if(!code || !grades[code]) return;
+      if(!confirm(`Delete the "${name}" column for this course? This removes that assessment's scores for all students.`)) return;
+      Object.values(grades[code]).forEach(entries => { delete entries[name]; });
+      renderGrades();
+    };
+    window.renderGrades = () => {
+      const code = document.getElementById('gradeCourse').value;
+      const roster = students.filter(s=>s.courseCode===code);
+      const assessments = assessmentsFor(code);
+      const head = document.getElementById('gradeHeadRow');
+      head.innerHTML = '<th class="sticky-col">Student</th>' + assessments.map(a=>
+        `<th>${a} <button type="button" title="Delete this assessment" onclick="deleteAssessmentColumn('${a.replace(/'/g,"\\'")}')" style="border:none;background:none;color:#C62828;cursor:pointer;font-weight:800;padding:0 0 0 4px;">×</button></th>`
+      ).join('') + '<th>Total</th>';
+      if(!roster.length || !assessments.length){
+        document.getElementById('gradeBody').innerHTML = `<tr><td colspan="${assessments.length+2}" class="empty-hint">${!roster.length?'No students in this course.':'Add an assessment column to start.'}</td></tr>`;
+        return;
+      }
+      document.getElementById('gradeBody').innerHTML = roster.map(s=>{
+        let sum=0;
+        const cells = assessments.map(a=>{
+          const entry = (grades[code][s.id] && grades[code][s.id][a]) || { score:0, max:100 };
+          sum += Number(entry.score)||0;
+          return `<td><input type="number" min="0" max="100" class="gradeCell" data-sid="${s.id}" data-name="${a}" value="${entry.score}" onchange="updateGradeCell(this)" style="width:70px;"></td>`;
+        }).join('');
+        return `<tr><td class="sticky-col">${s.name} <small style="color:var(--text-muted)">(${s.id})</small></td>${cells}<td><strong>${sum}</strong></td></tr>`;
+      }).join('');
+    };
+    window.updateGradeCell = (inp) => {
+      const code = document.getElementById('gradeCourse').value;
+      const sid = inp.dataset.sid, name = inp.dataset.name;
+      if(!grades[code][sid][name]) return;
+      let v = Number(inp.value) || 0;
+      if(v < 0) v = 0;
+      if(v > 100) v = 100;
+      inp.value = v;
+      grades[code][sid][name].score = v;
+      renderGrades();
+    };
+    window.saveGrades = async () => {
+      const code = document.getElementById('gradeCourse').value;
+      if(!code){ setStatus('gradeStatus','Choose a course first.', false); return; }
+      try{ setStatus('gradeStatus','Saving...'); await saveAll(); setStatus('gradeStatus','Saved.', true); }
+      catch(e){ setStatus('gradeStatus', e.message, false); }
+    };
+  </script>
+
+  <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>
