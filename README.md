@@ -1,40 +1,15 @@
-# Desktop App — Big Data AI Club Attendance & Grades
+# Desktop App — Big Data AI Club Attendance & Grades (fully offline)
 
-This wraps your live site (`https://jalal0019.github.io/Student_ws/`) in a
-native desktop window using [Electron](https://www.electronjs.org/) — a real
-`.exe` for Windows and `.dmg` for Mac, with a taskbar/dock icon, its own
-window, and no browser address bar. It's a thin shell: all the actual logic
-(Google sign-in, GitHub storage, attendance, grades) is exactly the same
-website you already have. Updating the website automatically updates what
-the app shows — there's nothing to re-release when you change the HTML files.
-
-**Why it loads the live URL instead of bundling the files:** Google Sign-In
-only works when the page is served from the real `https://jalal0019.github.io`
-origin that's registered in your Google Cloud OAuth settings. A desktop app
-loading local files (`file://`) can't satisfy that, so the app opens the real
-website inside its own window instead of shipping copies of the HTML.
-
-## Folder contents
-```
-desktop-app/
-├── main.js           ← creates the login + app windows, loads your site
-├── preload.js         ← securely connects the login screen to main.js
-├── app-ui/
-│   ├── login.html       ← local password screen shown before the app opens
-│   └── logo3.png         ← logo shown on the login screen
-├── package.json       ← app metadata + build configuration
-├── build/
-│   ├── icon.png        ← app icon (source)
-│   ├── icon.ico         ← Windows icon
-│   └── icon.icns         ← macOS icon
-└── .github/workflows/
-    └── build-desktop.yml ← builds .exe and .dmg automatically on GitHub
-```
+This is a completely offline desktop app — no internet connection is ever
+required to open it or to use it. All the pages (Instructor Portal, Student
+Profiles) are bundled inside the app itself, and all data (courses,
+students, attendance, grades) is saved to a file on **this computer**, not
+to GitHub or any server. There is no GitHub token and no online "connect"
+step of any kind — after the app password, it opens straight into your
+data.
 
 ## App password
-Before the site loads, the app shows its own local password screen — this
-is separate from Google Sign-In and from your GitHub token, and just
-controls who can open the app at all.
+Before anything loads, the app shows a local password screen.
 
 - **Default password: `bigdata2026`**
 - To set your own password, run this once with Node.js installed:
@@ -52,74 +27,99 @@ controls who can open the app at all.
   Rebuild the app (or re-run the GitHub Actions workflow) afterward for the
   new password to take effect.
 - The password is checked as a SHA-256 hash inside `main.js` (never stored
-  or shown in plain text), but this is still only light protection — anyone
-  with the app's source files could find the password by computing hashes
-  of guesses, or by editing `main.js` to skip the check entirely. It's
-  meant to keep out casual users, not to replace the real security (your
-  GitHub token and the instructor email check) inside the website itself.
+  or shown in plain text). This is light protection meant to keep out
+  casual users on a shared computer — anyone with the app's source files
+  could still find the password by editing `main.js`. If you need stronger
+  protection for the underlying data file itself, let me know and I can
+  add encryption at rest.
 
-## Important: Google Sign-In inside the app window
-Google actively blocks its sign-in flow inside many embedded "app" browser
-windows (it shows *"This browser or app may not be secure"*), which can
-affect Electron apps like this one. To reduce the chance of that happening,
-`main.js` sets the app window's user agent to look like a normal desktop
-Chrome browser. This works in most cases, but isn't guaranteed by Google —
-if sign-in still gets blocked after entering the app password, the safest
-fallback is opening `https://jalal0019.github.io/Student_ws/` in a normal
-browser (Chrome, Edge, Safari) instead of inside the app for that session.
+## How data storage works
+- Everything is stored in one file:
+  - **Windows**: `%APPDATA%\bigdata-attendance-offline\attendance-data.json`
+  - **Mac**: `~/Library/Application Support/bigdata-attendance-offline/attendance-data.json`
+- Every "Save" button in the app writes straight to that file. There's
+  nothing to sync and nothing that can fail due to no internet.
+- Because the data lives only on this computer, it is **not automatically
+  shared** between the Instructor Portal and Student Profiles page — it is,
+  in fact, shared, since both pages read the same local file — but it does
+  **not** sync between two different computers on its own.
+
+## Moving data between computers / backing it up
+Use the **Backup…** and **Restore…** buttons at the top of the Instructor
+Portal:
+- **Backup…** saves a copy of all your data as a `.json` file wherever you
+  choose (a USB drive, a cloud-synced folder, etc.).
+- **Restore…** loads a previously saved backup file, **replacing all
+  current data** on this computer (you'll be asked to confirm first).
+
+To move your data to a different computer: run the app once on the new
+computer (it starts empty), click **Restore…**, and pick the backup file
+from the old computer.
+
+## Folder contents
+```
+desktop-app-offline/
+├── main.js           ← creates the app window, reads/writes the local data file
+├── preload.js         ← securely connects the pages to main.js
+├── renderer/
+│   ├── login.html        ← app password screen (shown first)
+│   ├── index.html       ← portal picker
+│   ├── teacher.html       ← Instructor Portal
+│   ├── profiles.html       ← Student Profiles
+│   └── logo3.png, coai-english-logo.png, favicon.png ← club branding
+├── package.json       ← app metadata + build configuration
+├── build/
+│   ├── icon.png         ← app icon (source)
+│   ├── icon.ico          ← Windows icon
+│   └── icon.icns           ← macOS icon
+└── .github/workflows/
+    └── build-desktop.yml ← builds .exe and .dmg automatically on GitHub
+```
 
 ## Option A (recommended): let GitHub build it for you
 You don't need a Windows or Mac computer for this — GitHub's own servers do
-the building.
+the building. (This step itself needs internet, since it happens on
+GitHub's servers — the *finished app* you download afterward does not.)
 
-1. Create a **new repository** (e.g. `Student_ws_Desktop`) or add this
-   `desktop-app/` folder plus `.github/workflows/build-desktop.yml` to your
-   existing `Student_ws` repo, keeping the same folder structure shown above.
-2. Push it to GitHub.
-3. Go to the repo's **Actions** tab → "Build Desktop App" workflow → **Run
-   workflow** (or just push a change inside `desktop-app/` — it triggers
-   automatically).
-4. Wait a few minutes for both jobs (`build-windows`, `build-mac`) to finish.
-5. Open the finished run → scroll to **Artifacts** → download
+1. Push this `desktop-app-offline/` folder (with its
+   `.github/workflows/build-desktop.yml`) to a repository on GitHub.
+2. Go to the repo's **Actions** tab → "Build Desktop App" workflow → **Run
+   workflow** (or just push a change inside `desktop-app-offline/` — it
+   triggers automatically).
+3. Wait a few minutes for both jobs (`build-windows`, `build-mac`) to finish.
+4. Open the finished run → scroll to **Artifacts** → download
    `windows-installer` (contains the `.exe`) and `mac-installer` (contains
    the `.dmg`).
-
-Each run's artifacts are available for 90 days by default; re-run the
-workflow any time you want fresh installers.
 
 ## Option B: build it yourself locally
 Only do this if you already have the matching OS available.
 
 **On Windows** (produces the `.exe`):
 ```
-cd desktop-app
+cd desktop-app-offline
 npm install
 npm run dist:win
 ```
-The installer appears in `desktop-app/release/`.
+The installer appears in `desktop-app-offline/release/`.
 
 **On a Mac** (produces the `.dmg`):
 ```
-cd desktop-app
+cd desktop-app-offline
 npm install
 npm run dist:mac
 ```
-The `.dmg` appears in `desktop-app/release/`.
-
-You cannot reliably build a `.dmg` from Windows or Linux, or a properly
-signed `.exe` installer from a Mac — this is a limitation of the underlying
-build tools, which is exactly why Option A (GitHub's own Windows and Mac
-servers) is the easiest path.
+The `.dmg` appears in `desktop-app-offline/release/`.
 
 ## Notes
-- The app is **unsigned** (no Apple Developer or Windows code-signing
-  certificate attached). This means:
-  - **Windows** may show a "Windows protected your PC" SmartScreen warning
-    on first run — click "More info" → "Run anyway".
-  - **Mac** will say the app "cannot be opened because it is from an
-    unidentified developer" — right-click the app → **Open** (only needed
-    the first time).
-  This is normal for internal/club tools distributed outside an app store,
-  and does not affect how the app functions.
+- The app is **unsigned**. Windows may show a SmartScreen warning on first
+  run ("More info" → "Run anyway"); Mac will say it's from an "unidentified
+  developer" (right-click the app → **Open**, only needed once). This is
+  normal for internal tools distributed outside an app store.
+- **Minor cosmetic-only exception to "fully offline":** the interface uses
+  two Google Fonts (Plus Jakarta Sans, Inter) loaded from a CDN for nicer
+  typography. If there's no internet the very first time you open the app,
+  it simply falls back to your system's default font — nothing breaks,
+  nothing is blocked, it just won't look quite as polished until you're
+  next online. If you want this removed entirely so the fonts are bundled
+  locally too, let me know and I can add that.
 - To change the app's name, update `productName` in `package.json`.
-- To point the app at a different URL later, edit `SITE_URL` in `main.js`.
