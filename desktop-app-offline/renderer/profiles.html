@@ -744,6 +744,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const data = await window.localData.load();
       courses = data.courses; students = data.students;
       attendance = data.attendance; grades = data.grades;
+      migrateCourseLinks();
       renderCourseFilter();
       renderProfileList();
     };
@@ -752,15 +753,34 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       await window.localData.save({ courses, students, attendance, grades });
     }
 
+    function courseKey(c){ return c.semester ? c.code + '::' + c.semester : c.code; }
+    function studentInCourse(s, c){ return s.courseCode === courseKey(c) || s.courseCode === c.code; }
+    function migrateCourseLinks(){
+      courses.forEach(c=>{
+        const legacy = c.code, key = courseKey(c);
+        if(legacy === key) return;
+        students.forEach(s=>{ if(s.courseCode === legacy) s.courseCode = key; });
+        if(attendance[legacy]){
+          attendance[key] = Object.assign(attendance[key] || {}, attendance[legacy]);
+          delete attendance[legacy];
+        }
+        if(grades[legacy]){
+          grades[key] = Object.assign(grades[key] || {}, grades[legacy]);
+          delete grades[legacy];
+        }
+      });
+    }
+
     // ---------- Student profiles ----------
     function renderCourseFilter(){
       const pcf = document.getElementById('profileCourseFilter'); const cur = pcf.value;
-      pcf.innerHTML = '<option value="">All courses</option>' + courses.map(c=>`<option value="${c.code}">${c.code} — ${c.name}</option>`).join('');
-      if(courses.some(c=>c.code===cur)) pcf.value = cur;
+      pcf.innerHTML = '<option value="">All courses</option>' + courses.map(c=>`<option value="${courseKey(c)}">${c.code} — ${c.name}${c.semester?` (${c.semester})`:''}</option>`).join('');
+      if(courses.some(c=>courseKey(c)===cur)) pcf.value = cur;
     }
     function attendanceStatsFor(s){
       let present=0, absent=0, late=0;
-      const courseAtt = attendance[s.courseCode] || {};
+      const course = courses.find(c=>studentInCourse(s, c));
+      const courseAtt = (course && attendance[courseKey(course)]) || {};
       Object.values(courseAtt).forEach(day=>{
         const st = day[s.id];
         if(!st) return;
@@ -773,16 +793,21 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const q = (document.getElementById('profileSearch').value || '').trim().toLowerCase();
       const courseFilter = document.getElementById('profileCourseFilter').value;
       const rows = students.filter(s=>{
-        if(courseFilter && s.courseCode !== courseFilter) return false;
+        if(courseFilter){
+          const course = courses.find(c=>courseKey(c)===courseFilter);
+          if(!course || !studentInCourse(s, course)) return false;
+        }
         if(!q) return true;
         return s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.email||'').toLowerCase().includes(q);
       });
       document.getElementById('profileList').innerHTML = rows.map(s=>{
         const stats = attendanceStatsFor(s);
         const pctLabel = stats.pct===null ? '—' : stats.pct+'%';
+        const course = courses.find(c=>studentInCourse(s, c));
+        const courseLabel = course ? course.code + (course.semester ? ` (${course.semester})` : '') : '—';
         return `<tr>
         <td><button class="btn btn-primary btn-sm" onclick="openProfile('${s.id}')">View</button></td>
-        <td>${s.id}</td><td>${s.name}</td><td>${s.email||'—'}</td><td>${s.courseCode||'—'}</td><td>${pctLabel}</td>
+        <td>${s.id}</td><td>${s.name}</td><td>${s.email||'—'}</td><td>${courseLabel}</td><td>${pctLabel}</td>
         <td style="text-align:right;"><button class="btn btn-danger btn-sm" onclick="removeStudentHere('${s.id}')">Delete</button></td>
         </tr>`;
       }).join('') || '<tr><td colspan="7" class="empty-hint">No matching students.</td></tr>';
@@ -790,11 +815,12 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     window.openProfile = (sid) => {
       const s = students.find(x=>x.id===sid);
       if(!s) return;
-      const course = courses.find(c=>c.code===s.courseCode);
+      const course = courses.find(c=>studentInCourse(s, c));
       document.getElementById('profileModalName').textContent = s.name;
-      document.getElementById('profileModalMeta').textContent = `${s.id} · ${s.email||'no email on file'} · ${course ? course.code+' — '+course.name : 'no course'}`;
+      document.getElementById('profileModalMeta').textContent = `${s.id} · ${s.email||'no email on file'} · ${course ? course.code+' — '+course.name+(course.semester?' ('+course.semester+')':'') : 'no course'}`;
 
-      const courseGrades = (grades[s.courseCode] && grades[s.courseCode][s.id]) || {};
+      const key = course ? courseKey(course) : null;
+      const courseGrades = (key && grades[key] && grades[key][s.id]) || {};
       const gradeEntries = Object.entries(courseGrades);
       const totalScore = gradeEntries.reduce((sum, [,v]) => sum + (Number(v.score)||0), 0);
       const gradeRows = gradeEntries.map(([name,v])=>`<tr><td>${name}</td><td>${v.score}</td></tr>`).join('');
@@ -811,7 +837,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
         <div class="stat-card"><div class="stat-icon">🧮</div><div><h3>${totalScore}</h3><p>Total grade</p></div></div>
       `;
 
-      const courseAtt = attendance[s.courseCode] || {};
+      const courseAtt = (key && attendance[key]) || {};
       const attRows = Object.keys(courseAtt).sort().map(date=>{
         const st = courseAtt[date][s.id];
         if(!st) return '';

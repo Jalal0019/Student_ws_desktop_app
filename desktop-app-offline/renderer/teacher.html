@@ -801,7 +801,10 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
             <tbody id="attBody"></tbody>
           </table>
         </div>
-        <button class="btn btn-primary" style="margin-top:14px;" onclick="saveAttendance()">Save attendance</button>
+        <div class="actions" style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="saveAttendance()">Save attendance</button>
+          <button class="btn btn-ghost" onclick="exportAttendanceCSV()">Export to Excel (.csv)</button>
+        </div>
         <div class="status-msg" id="attStatus"></div>
       </div>
     </div>
@@ -826,7 +829,10 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
             <tbody id="gradeBody"></tbody>
           </table>
         </div>
-        <button class="btn btn-primary" style="margin-top:14px;" onclick="saveGrades()">Save grades</button>
+        <div class="actions" style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="saveGrades()">Save grades</button>
+          <button class="btn btn-ghost" onclick="exportGradesCSV()">Export to Excel (.csv)</button>
+        </div>
         <div class="status-msg" id="gradeStatus"></div>
       </div>
     </div>
@@ -846,6 +852,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const data = await window.localData.load();
       courses = data.courses; students = data.students;
       attendance = data.attendance; grades = data.grades;
+      migrateCourseLinks();
       renderRoster();
     };
 
@@ -865,6 +872,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       if(result && result.ok){
         courses = result.data.courses; students = result.data.students;
         attendance = result.data.attendance; grades = result.data.grades;
+        migrateCourseLinks();
         renderRoster();
         alert('Data restored successfully.');
       }
@@ -888,6 +896,33 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
 
     let activeSemester = '';
 
+    // A course's real identity is code+semester combined, since the same
+    // code may be reused across different semesters (e.g. AICI201 offered
+    // in both Fall 2026 and Spring 2027 are two different courses).
+    function courseKey(c){ return c.semester ? c.code + '::' + c.semester : c.code; }
+    // Matches a student against a course, accepting both the current
+    // composite key and a plain course code (for data saved before this
+    // fix, when only the code was used as the link).
+    function studentInCourse(s, c){ return s.courseCode === courseKey(c) || s.courseCode === c.code; }
+    // One-time repair: if older data linked students/attendance/grades to a
+    // course using just its code, and that course now has a semester set
+    // (so its real key changed), move that data over to the new key.
+    function migrateCourseLinks(){
+      courses.forEach(c=>{
+        const legacy = c.code, key = courseKey(c);
+        if(legacy === key) return;
+        students.forEach(s=>{ if(s.courseCode === legacy) s.courseCode = key; });
+        if(attendance[legacy]){
+          attendance[key] = Object.assign(attendance[key] || {}, attendance[legacy]);
+          delete attendance[legacy];
+        }
+        if(grades[legacy]){
+          grades[key] = Object.assign(grades[key] || {}, grades[legacy]);
+          delete grades[legacy];
+        }
+      });
+    }
+
     function distinctSemesters(){
       return [...new Set(courses.map(c=>c.semester).filter(Boolean))].sort();
     }
@@ -903,9 +938,11 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const f = document.getElementById('semesterFilter').value;
       return f ? courses.filter(c=>c.semester===f) : courses;
     }
+    // Enrollment/attendance/gradebook dropdowns always list every course,
+    // regardless of the semester filter, so a course never silently
+    // disappears mid-entry and gets mismatched with the wrong selection.
     function courseSelectOptions(){
-      const list = filteredCourses();
-      return list.map(c=>`<option value="${c.code}">${c.code} — ${c.name}</option>`).join('') || '<option value="">Add a course first</option>';
+      return courses.map(c=>`<option value="${courseKey(c)}">${c.code} — ${c.name}${c.semester?` (${c.semester})`:''}</option>`).join('') || '<option value="">Add a course first</option>';
     }
     function renderRoster(){
       document.getElementById('statCourses').textContent = courses.length;
@@ -923,10 +960,12 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
         return `<tr><td>${c.code}</td><td>${c.name}</td><td>${c.semester||'—'}</td><td><button class="btn btn-danger btn-sm" onclick="removeCourse(${i})">Delete</button></td></tr>`;
       }).join('') || '<tr><td colspan="4" class="empty-hint">No courses yet.</td></tr>';
 
+      // These dropdowns always list every course (see courseSelectOptions),
+      // so the selection is only reset if the course itself was deleted.
       ['studentCourse','bulkCourse','attCourse','gradeCourse'].forEach(id=>{
         const el = document.getElementById(id); const cur = el.value;
         el.innerHTML = courseSelectOptions();
-        if(filteredCourses().some(c=>c.code===cur)) el.value = cur;
+        if(courses.some(c=>courseKey(c)===cur)) el.value = cur;
       });
       renderAttendance(); renderGrades();
     }
@@ -935,7 +974,11 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const code = document.getElementById('courseCode').value.trim();
       const name = document.getElementById('courseName').value.trim();
       if(!code || !name){ setStatus('courseStatus','Fill in both fields.', false); return; }
-      if(courses.some(c=>c.code===code)){ setStatus('courseStatus','This code already exists.', false); return; }
+      const candidateKey = courseKey({ code, semester: activeSemester || '' });
+      if(courses.some(c=>courseKey(c)===candidateKey)){
+        setStatus('courseStatus', activeSemester ? `This code already exists in ${activeSemester}.` : 'This code already exists (with no semester set).', false);
+        return;
+      }
       courses.push({code, name, semester: activeSemester || ''});
       document.getElementById('courseCode').value=''; document.getElementById('courseName').value='';
       setStatus('courseStatus','Added — click "Save courses" to keep it.', true);
@@ -1027,7 +1070,8 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     };
     window.renderAttendance = () => {
       const code = document.getElementById('attCourse').value;
-      const roster = students.filter(s=>s.courseCode===code);
+      const course = courses.find(c=>courseKey(c)===code);
+      const roster = course ? students.filter(s=>studentInCourse(s, course)) : [];
       const dates = sessionDatesFor(code);
       const head = document.getElementById('attHeadRow');
       head.innerHTML = '<th class="sticky-col">Student</th>' + dates.map(d=>
@@ -1067,6 +1111,48 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       catch(e){ setStatus('attStatus', e.message, false); }
     };
 
+    // ---------- CSV export (opens directly in Excel) ----------
+    function csvCell(v){
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    }
+    function downloadCSV(filename, rows){
+      const csv = rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    function safeFileName(s){
+      return String(s).replace(/[^a-z0-9\-_. ]+/gi, '_');
+    }
+    window.exportAttendanceCSV = () => {
+      const code = document.getElementById('attCourse').value;
+      const course = courses.find(c=>courseKey(c)===code);
+      if(!course){ setStatus('attStatus','Choose a course first.', false); return; }
+      const roster = students.filter(s=>studentInCourse(s, course));
+      const dates = sessionDatesFor(code);
+      if(!roster.length || !dates.length){ setStatus('attStatus','Nothing to export yet.', false); return; }
+      const header = ['Student ID', 'Student Name', ...dates, 'Present', 'Absent', 'Attendance %'];
+      const rows = [header];
+      roster.forEach(s=>{
+        let present=0, absent=0, late=0;
+        const cells = dates.map(d=>{
+          const st = (attendance[code][d] && attendance[code][d][s.id]) || 'present';
+          if(st==='present') present++; else if(st==='absent') absent++; else late++;
+          return st.charAt(0).toUpperCase()+st.slice(1);
+        });
+        const total = present+absent+late;
+        const pct = total ? Math.round(present*100/total) : 0;
+        rows.push([s.id, s.name, ...cells, present, absent+late, pct+'%']);
+      });
+      const label = course.semester ? `${course.code}_${course.semester}` : course.code;
+      downloadCSV(`Attendance_${safeFileName(label)}.csv`, rows);
+      setStatus('attStatus','Exported.', true);
+    };
+
     // ---------- Gradebook grid ----------
     function assessmentsFor(code){
       const names = new Set();
@@ -1081,7 +1167,8 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       if(!code){ setStatus('gradeStatus','Choose a course first.', false); return; }
       if(!name){ setStatus('gradeStatus','Name the assessment first.', false); return; }
       if(!grades[code]) grades[code] = {};
-      const roster = students.filter(s=>s.courseCode===code);
+      const course = courses.find(c=>courseKey(c)===code);
+      const roster = course ? students.filter(s=>studentInCourse(s, course)) : [];
       roster.forEach(s=>{
         if(!grades[code][s.id]) grades[code][s.id] = {};
         if(!grades[code][s.id][name]) grades[code][s.id][name] = { score: 0, max };
@@ -1098,7 +1185,8 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     };
     window.renderGrades = () => {
       const code = document.getElementById('gradeCourse').value;
-      const roster = students.filter(s=>s.courseCode===code);
+      const course = courses.find(c=>courseKey(c)===code);
+      const roster = course ? students.filter(s=>studentInCourse(s, course)) : [];
       const assessments = assessmentsFor(code);
       const head = document.getElementById('gradeHeadRow');
       head.innerHTML = '<th class="sticky-col">Student</th>' + assessments.map(a=>
@@ -1134,6 +1222,29 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       if(!code){ setStatus('gradeStatus','Choose a course first.', false); return; }
       try{ setStatus('gradeStatus','Saving...'); await saveAll(); setStatus('gradeStatus','Saved.', true); }
       catch(e){ setStatus('gradeStatus', e.message, false); }
+    };
+    window.exportGradesCSV = () => {
+      const code = document.getElementById('gradeCourse').value;
+      const course = courses.find(c=>courseKey(c)===code);
+      if(!course){ setStatus('gradeStatus','Choose a course first.', false); return; }
+      const roster = students.filter(s=>studentInCourse(s, course));
+      const assessments = assessmentsFor(code);
+      if(!roster.length || !assessments.length){ setStatus('gradeStatus','Nothing to export yet.', false); return; }
+      const header = ['Student ID', 'Student Name', ...assessments, 'Total'];
+      const rows = [header];
+      roster.forEach(s=>{
+        let sum = 0;
+        const cells = assessments.map(a=>{
+          const entry = (grades[code][s.id] && grades[code][s.id][a]) || { score:0 };
+          const score = Number(entry.score)||0;
+          sum += score;
+          return score;
+        });
+        rows.push([s.id, s.name, ...cells, sum]);
+      });
+      const label = course.semester ? `${course.code}_${course.semester}` : course.code;
+      downloadCSV(`Grades_${safeFileName(label)}.csv`, rows);
+      setStatus('gradeStatus','Exported.', true);
     };
   </script>
 
