@@ -61,7 +61,7 @@ ipcMain.handle('data:backup', async () => {
   const win = BrowserWindow.getFocusedWindow();
   const { canceled, filePath } = await dialog.showSaveDialog(win, {
     title: 'Save a backup copy',
-    defaultPath: `attendance-backup-${new Date().toISOString().slice(0, 10)}.json`,
+    defaultPath: `backup-Instructor-${new Date().toISOString().slice(0, 10)}.json`,
     filters: [{ name: 'JSON', extensions: ['json'] }],
   });
   if (canceled || !filePath) return { ok: false };
