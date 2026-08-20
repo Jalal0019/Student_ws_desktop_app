@@ -1023,27 +1023,31 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       const raw = document.getElementById('bulkPaste').value;
       if(!courseCode){ setStatus('studentStatus','Choose a course for this batch first.', false); return; }
       if(!raw.trim()){ setStatus('studentStatus','Paste some rows first.', false); return; }
-      const lines = raw.split('\n').map(l=>l.trim()).filter(Boolean);
-      let added = 0, skipped = 0;
+      // Strip invisible characters Excel/Windows sometimes embeds when
+      // copying (zero-width spaces, bidi/direction marks, BOM).
+      const clean = (s) => s.replace(/[\u200B-\u200F\u202A-\u202E\uFEFF]/g, '').trim();
+      const lines = raw.split(/\r\n|\r|\n/).map(l=>l.trim()).filter(Boolean);
+      let added = 0, skipped = 0, reasons = [];
       lines.forEach(line=>{
-        // Accept tab or comma separated: Name, ID, Email
+        // Columns are always Name, ID, Email (in that order) — matching
+        // exactly what's shown above the box. Accepts tab or comma between
+        // columns, since Excel pastes tabs but a manually typed line might
+        // use commas instead.
         const parts = line.split('\t').length > 1 ? line.split('\t') : line.split(',');
-        const cells = parts.map(p=>p.trim()).filter(p=>p!=='');
-        if(cells.length < 2){ skipped++; return; }
-        // Figure out which cell is the ID (all-digits or alnum id-like) vs name
-        let name, id, email='';
-        const idLike = cells.find(c=>/^[A-Za-z0-9\-]+$/.test(c) && /\d/.test(c) && !c.includes('@'));
-        const emailLike = cells.find(c=>c.includes('@'));
-        if(idLike){ id = idLike; name = cells.find(c=>c!==idLike && c!==emailLike) || cells[0]; }
-        else { name = cells[0]; id = cells[1]; }
-        if(emailLike) email = emailLike.toLowerCase();
-        if(!name || !id){ skipped++; return; }
-        if(students.some(s=>s.id===id)){ skipped++; return; }
+        const cells = parts.map(clean);
+        const name = cells[0] || '';
+        const id = cells[1] || '';
+        const email = (cells[2] || '').toLowerCase();
+        if(!name || !id){ skipped++; reasons.push(`"${line}" — missing name or ID`); return; }
+        if(students.some(s=>s.id===id)){ skipped++; reasons.push(`ID ${id} already exists`); return; }
         students.push({ id, name, email, courseCode });
         added++;
       });
       document.getElementById('bulkPaste').value = '';
-      setStatus('studentStatus', `Added ${added} student(s)${skipped?`, skipped ${skipped} row(s)`:''} — click "Save students" to keep them.`, added>0);
+      let msg = `Added ${added} student(s)`;
+      if(skipped) msg += `, skipped ${skipped}: ${reasons.slice(0,3).join('; ')}${reasons.length>3?'…':''}`;
+      msg += added ? ' — click "Save students" to keep them.' : '';
+      setStatus('studentStatus', msg, added>0);
       renderRoster();
     };
 
