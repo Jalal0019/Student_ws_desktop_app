@@ -744,7 +744,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
           <div class="table-wrap" style="margin-top:16px;">
             <table class="grid-table"><thead><tr><th>Code</th><th>Title</th><th>Semester</th><th></th></tr></thead><tbody id="coursesList"></tbody></table>
           </div>
-          <div class="actions" style="margin-top:12px;">
+          <div class="actions" style="margin-top:12px; justify-content:space-between;">
             <button class="btn btn-ghost btn-sm" onclick="saveCourses()">Save courses</button>
             <button class="btn btn-danger btn-sm" onclick="resetCourses()">Reset all courses</button>
           </div>
@@ -776,10 +776,12 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
             <button class="btn btn-primary" onclick="bulkEnroll()">Add all pasted students</button>
           </div>
           <div class="status-msg" id="studentStatus"></div>
-          <div class="actions" style="margin-top:14px;">
-            <button class="btn btn-ghost btn-sm" onclick="saveStudents()">Save students</button>
+          <div class="actions" style="margin-top:14px; justify-content:space-between;">
+            <div class="actions" style="margin:0;">
+              <button class="btn btn-ghost btn-sm" onclick="saveStudents()">Save students</button>
+              <a href="profiles.html" class="btn btn-gold btn-sm" style="text-decoration:none;">View student profiles →</a>
+            </div>
             <button class="btn btn-danger btn-sm" onclick="resetStudents()">Reset all students</button>
-            <a href="profiles.html" class="btn btn-gold btn-sm" style="text-decoration:none;">View student profiles →</a>
           </div>
         </div>
       </div>
@@ -805,9 +807,11 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
             <tbody id="attBody"></tbody>
           </table>
         </div>
-        <div class="actions" style="margin-top:14px;">
-          <button class="btn btn-primary" onclick="saveAttendance()">Save attendance</button>
-          <button class="btn btn-ghost" onclick="exportAttendanceCSV()">Export to Excel (.csv)</button>
+        <div class="actions" style="margin-top:14px; justify-content:space-between;">
+          <div class="actions" style="margin:0;">
+            <button class="btn btn-primary" onclick="saveAttendance()">Save attendance</button>
+            <button class="btn btn-ghost" onclick="exportAttendanceCSV()">Export to Excel (.csv)</button>
+          </div>
           <button class="btn btn-danger" onclick="resetAttendance()">Reset all attendance</button>
         </div>
         <div class="status-msg" id="attStatus"></div>
@@ -834,9 +838,11 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
             <tbody id="gradeBody"></tbody>
           </table>
         </div>
-        <div class="actions" style="margin-top:14px;">
-          <button class="btn btn-primary" onclick="saveGrades()">Save grades</button>
-          <button class="btn btn-ghost" onclick="exportGradesCSV()">Export to Excel (.csv)</button>
+        <div class="actions" style="margin-top:14px; justify-content:space-between;">
+          <div class="actions" style="margin:0;">
+            <button class="btn btn-primary" onclick="saveGrades()">Save grades</button>
+            <button class="btn btn-ghost" onclick="exportGradesCSV()">Export to Excel (.csv)</button>
+          </div>
           <button class="btn btn-danger" onclick="resetGrades()">Reset all grades</button>
         </div>
         <div class="status-msg" id="gradeStatus"></div>
