@@ -674,12 +674,10 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
 <body>
   <!-- AUTH TOP BAR -->
   <div class="auth-topbar">
-    <div class="not-signed" id="tbNotSigned">
-      <span>Not connected</span>
-    </div>
-    <div class="signed-in" id="tbSignedIn">
-      <span class="tb-role badge-role badge-admin">Instructor</span>
-      <button class="tb-signout" onclick="tbSignOut()">Disconnect</button>
+    <div class="signed-in" id="tbSignedIn" style="display:flex;">
+      <span class="tb-role badge-role badge-admin">Offline — saved on this computer</span>
+      <button class="tb-signout" onclick="backupData()">Backup…</button>
+      <button class="tb-signout" onclick="restoreData()">Restore…</button>
     </div>
   </div>
 
@@ -704,20 +702,8 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     </div>
   </nav>
 
-  <!-- GitHub token gate -->
-  <div class="access-gate" id="tokenGate">
-    <h1>Instructor access</h1>
-    <p class="sub">Enter a GitHub token (kept only for this session) to load and edit the data.</p>
-    <div class="dash-panel" style="text-align:left; max-width:440px; margin:0 auto;">
-      <label>GitHub Personal Access Token</label>
-      <input id="cfgToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-      <button class="btn btn-primary" style="width:100%;" onclick="connect()">Connect and load data</button>
-      <div class="status-msg err" id="connectStatus"></div>
-    </div>
-  </div>
-
   <!-- DASHBOARD -->
-  <main class="dash-main" id="dashboard" style="display:none;">
+  <main class="dash-main" id="dashboard">
 
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-icon">📖</div><div><h3 id="statCourses">0</h3><p>Courses</p></div></div>
@@ -758,7 +744,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
           <div class="table-wrap" style="margin-top:16px;">
             <table class="grid-table"><thead><tr><th>Code</th><th>Title</th><th>Semester</th><th></th></tr></thead><tbody id="coursesList"></tbody></table>
           </div>
-          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="saveCourses()">Save courses to GitHub</button>
+          <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="saveCourses()">Save courses</button>
         </div>
 
         <div class="dash-panel">
@@ -788,7 +774,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
           </div>
           <div class="status-msg" id="studentStatus"></div>
           <div class="actions" style="margin-top:14px;">
-            <button class="btn btn-ghost btn-sm" onclick="saveStudents()">Save students to GitHub</button>
+            <button class="btn btn-ghost btn-sm" onclick="saveStudents()">Save students</button>
             <a href="profiles.html" class="btn btn-gold btn-sm" style="text-decoration:none;">View student profiles →</a>
           </div>
         </div>
@@ -816,7 +802,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
           </table>
         </div>
         <div class="actions" style="margin-top:14px;">
-          <button class="btn btn-primary" onclick="saveAttendance()">Save attendance to GitHub</button>
+          <button class="btn btn-primary" onclick="saveAttendance()">Save attendance</button>
           <button class="btn btn-ghost" onclick="exportAttendanceCSV()">Export to Excel (.csv)</button>
         </div>
         <div class="status-msg" id="attStatus"></div>
@@ -844,7 +830,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
           </table>
         </div>
         <div class="actions" style="margin-top:14px;">
-          <button class="btn btn-primary" onclick="saveGrades()">Save grades to GitHub</button>
+          <button class="btn btn-primary" onclick="saveGrades()">Save grades</button>
           <button class="btn btn-ghost" onclick="exportGradesCSV()">Export to Excel (.csv)</button>
         </div>
         <div class="status-msg" id="gradeStatus"></div>
@@ -859,65 +845,39 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
   </footer>
 
   <script>
-    // Fixed repository location — edit here if the repo ever moves
-    const REPO = { owner: 'jalal0019', repo: 'Student_ws', branch: 'main', path: 'data' };
-    let cfg = { ...REPO, token: '' }, courses = [], students = [], attendance = {}, grades = {};
-    let shas = { courses: null, students: null, attendance: null, grades: null };
+    let courses = [], students = [], attendance = {}, grades = {};
 
-    window.onload = function(){
+    window.onload = async function(){
       document.getElementById('attNewDate').valueAsDate = new Date();
-      tryAutoConnect();
-    };
-
-    window.tbSignOut = () => { localStorage.removeItem('teacherToken'); location.reload(); };
-
-    async function loadAllData(){
-      const c = await ghGet('courses.json'); courses = c.data || []; shas.courses = c.sha;
-      const s = await ghGet('students.json'); students = s.data || []; shas.students = s.sha;
-      const a = await ghGet('attendance.json'); attendance = a.data || {}; shas.attendance = a.sha;
-      const g = await ghGet('grades.json'); grades = g.data || {}; shas.grades = g.sha;
-    }
-    function showDashboard(){
-      document.getElementById('tbNotSigned').style.display = 'none';
-      document.getElementById('tbSignedIn').style.display = 'flex';
-      document.getElementById('tokenGate').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
+      const data = await window.localData.load();
+      courses = data.courses; students = data.students;
+      attendance = data.attendance; grades = data.grades;
       migrateCourseLinks();
       renderRoster();
+    };
+
+    async function saveAll(){
+      await window.localData.save({ courses, students, attendance, grades });
     }
 
-    // Automatically reconnect with a previously saved token, if any
-    async function tryAutoConnect(){
-      const savedToken = localStorage.getItem('teacherToken');
-      if(!savedToken) return;
-      cfg = { ...REPO, token: savedToken };
-      try{
-        await loadAllData();
-        showDashboard();
-      }catch(e){
-        localStorage.removeItem('teacherToken');
+    window.backupData = async () => {
+      const result = await window.localData.backup();
+      if(result && result.ok){
+        alert('Backup saved to:\n' + result.filePath);
       }
-    }
+    };
+    window.restoreData = async () => {
+      if(!confirm('Restoring a backup will replace ALL current data on this computer. Continue?')) return;
+      const result = await window.localData.restore();
+      if(result && result.ok){
+        courses = result.data.courses; students = result.data.students;
+        attendance = result.data.attendance; grades = result.data.grades;
+        migrateCourseLinks();
+        renderRoster();
+        alert('Data restored successfully.');
+      }
+    };
 
-    async function ghGet(filename){
-      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}/${filename}?ref=${cfg.branch}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${cfg.token}`, Accept:'application/vnd.github+json' } });
-      if(res.status === 404) return { data: null, sha: null };
-      if(!res.ok) throw new Error(`Failed to load ${filename}: ${res.status}`);
-      const json = await res.json();
-      const content = decodeURIComponent(escape(atob(json.content.replace(/\n/g,''))));
-      return { data: JSON.parse(content), sha: json.sha };
-    }
-    async function ghPut(filename, dataObj, sha, message){
-      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}/${filename}`;
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataObj, null, 2))));
-      const body = { message: message || `update ${filename}`, content, branch: cfg.branch };
-      if(sha) body.sha = sha;
-      const res = await fetch(url, { method:'PUT', headers:{ Authorization:`Bearer ${cfg.token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-      if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(`Failed to save ${filename}: ${err.message || res.status}`); }
-      const json = await res.json();
-      return json.content.sha;
-    }
     function setStatus(id, msg, ok){
       const el = document.getElementById(id);
       el.textContent = msg; el.className = 'status-msg ' + (ok===true?'ok':ok===false?'err':'');
@@ -933,17 +893,6 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       };
     });
     window.switchTab = (name) => document.querySelector(`.tab-btn[data-tab="${name}"]`).click();
-
-    window.connect = async () => {
-      cfg.token = document.getElementById('cfgToken').value.trim();
-      if(!cfg.token){ setStatus('connectStatus','Please enter a token.', false); return; }
-      setStatus('connectStatus','Connecting and loading data...');
-      try{
-        await loadAllData();
-        localStorage.setItem('teacherToken', cfg.token);
-        showDashboard();
-      }catch(e){ setStatus('connectStatus', e.message, false); }
-    };
 
     let activeSemester = '';
 
@@ -1032,12 +981,12 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       }
       courses.push({code, name, semester: activeSemester || ''});
       document.getElementById('courseCode').value=''; document.getElementById('courseName').value='';
-      setStatus('courseStatus','Added locally — click "Save courses to GitHub".', true);
+      setStatus('courseStatus','Added — click "Save courses" to keep it.', true);
       renderRoster();
     };
     window.removeCourse = (i) => { courses.splice(i,1); renderRoster(); };
     window.saveCourses = async () => {
-      try{ setStatus('courseStatus','Saving...'); shas.courses = await ghPut('courses.json', courses, shas.courses, 'Update courses'); setStatus('courseStatus','Saved.', true); }
+      try{ setStatus('courseStatus','Saving...'); await saveAll(); setStatus('courseStatus','Saved.', true); }
       catch(e){ setStatus('courseStatus', e.message, false); }
     };
 
@@ -1053,11 +1002,11 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       if(students.some(s=>s.id===id && s.courseCode===courseCode)){ setStatus('studentStatus','This student is already enrolled in this course.', false); return; }
       students.push({id, name, email, courseCode});
       document.getElementById('studentId').value=''; document.getElementById('studentName').value=''; document.getElementById('studentEmail').value='';
-      setStatus('studentStatus','Added locally — click "Save students to GitHub".', true);
+      setStatus('studentStatus','Added — click "Save students" to keep it.', true);
       renderRoster();
     };
     window.saveStudents = async () => {
-      try{ setStatus('studentStatus','Saving...'); shas.students = await ghPut('students.json', students, shas.students, 'Update students'); setStatus('studentStatus','Saved.', true); }
+      try{ setStatus('studentStatus','Saving...'); await saveAll(); setStatus('studentStatus','Saved.', true); }
       catch(e){ setStatus('studentStatus', e.message, false); }
     };
 
@@ -1095,7 +1044,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       document.getElementById('bulkPaste').value = '';
       let msg = `Added ${added} student(s)`;
       if(skipped) msg += `, skipped ${skipped}: ${reasons.slice(0,3).join('; ')}${reasons.length>3?'…':''}`;
-      msg += added ? ' — click "Save students to GitHub".' : '';
+      msg += added ? ' — click "Save students" to keep them.' : '';
       setStatus('studentStatus', msg, added>0);
       renderRoster();
     };
@@ -1160,7 +1109,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     window.saveAttendance = async () => {
       const code = document.getElementById('attCourse').value;
       if(!code){ setStatus('attStatus','Choose a course first.', false); return; }
-      try{ setStatus('attStatus','Saving...'); shas.attendance = await ghPut('attendance.json', attendance, shas.attendance, `Update attendance ${code}`); setStatus('attStatus','Saved.', true); }
+      try{ setStatus('attStatus','Saving...'); await saveAll(); setStatus('attStatus','Saved.', true); }
       catch(e){ setStatus('attStatus', e.message, false); }
     };
 
@@ -1277,7 +1226,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     window.saveGrades = async () => {
       const code = document.getElementById('gradeCourse').value;
       if(!code){ setStatus('gradeStatus','Choose a course first.', false); return; }
-      try{ setStatus('gradeStatus','Saving...'); shas.grades = await ghPut('grades.json', grades, shas.grades, `Update grades ${code}`); setStatus('gradeStatus','Saved.', true); }
+      try{ setStatus('gradeStatus','Saving...'); await saveAll(); setStatus('gradeStatus','Saved.', true); }
       catch(e){ setStatus('gradeStatus', e.message, false); }
     };
     window.exportGradesCSV = () => {

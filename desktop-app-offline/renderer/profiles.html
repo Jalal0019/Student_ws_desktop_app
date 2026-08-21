@@ -673,12 +673,8 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
 </head>
 <body>
   <div class="auth-topbar">
-    <div class="not-signed" id="tbNotSigned">
-      <span>Not connected</span>
-    </div>
-    <div class="signed-in" id="tbSignedIn">
-      <span class="tb-role badge-role badge-admin">Instructor</span>
-      <button class="tb-signout" onclick="tbSignOut()">Disconnect</button>
+    <div class="signed-in" id="tbSignedIn" style="display:flex;">
+      <span class="tb-role badge-role badge-admin">Offline — saved on this computer</span>
     </div>
   </div>
 
@@ -703,18 +699,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
     </div>
   </nav>
 
-  <div class="access-gate" id="tokenGate">
-    <h1>Instructor access</h1>
-    <p class="sub">Enter a GitHub token (kept only for this session) to load the data.</p>
-    <div class="dash-panel" style="text-align:left; max-width:440px; margin:0 auto;">
-      <label>GitHub Personal Access Token</label>
-      <input id="cfgToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-      <button class="btn btn-primary" style="width:100%;" onclick="connect()">Connect and load data</button>
-      <div class="status-msg err" id="connectStatus"></div>
-    </div>
-  </div>
-
-  <main class="dash-main" id="dashboard" style="display:none;">
+  <main class="dash-main" id="dashboard">
     <div class="dash-panel">
       <h2>Student profiles</h2>
       <div class="field-row">
@@ -760,47 +745,21 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
   </div>
 
   <script>
-    const REPO = { owner: 'jalal0019', repo: 'Student_ws', branch: 'main', path: 'data' };
+    let courses = [], students = [], attendance = {}, grades = {};
 
-    let cfg = { ...REPO, token: '' }, courses = [], students = [], attendance = {}, grades = {};
-    let shas = { courses: null, students: null, attendance: null, grades: null };
-
-    window.onload = function(){
-      tryAutoConnect();
+    window.onload = async function(){
+      const data = await window.localData.load();
+      courses = data.courses; students = data.students;
+      attendance = data.attendance; grades = data.grades;
+      migrateCourseLinks();
+      renderCourseFilter();
+      renderProfileList();
     };
 
-    window.tbSignOut = () => { localStorage.removeItem('teacherToken'); location.reload(); };
-
-    async function ghGet(filename){
-      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}/${filename}?ref=${cfg.branch}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${cfg.token}`, Accept:'application/vnd.github+json' } });
-      if(res.status === 404) return { data: null, sha: null };
-      if(!res.ok) throw new Error(`Failed to load ${filename}: ${res.status}`);
-      const json = await res.json();
-      const content = decodeURIComponent(escape(atob(json.content.replace(/\n/g,''))));
-      return { data: JSON.parse(content), sha: json.sha };
-    }
-    async function ghPut(filename, dataObj, sha, message){
-      const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}/${filename}`;
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataObj, null, 2))));
-      const body = { message: message || `update ${filename}`, content, branch: cfg.branch };
-      if(sha) body.sha = sha;
-      const res = await fetch(url, { method:'PUT', headers:{ Authorization:`Bearer ${cfg.token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-      if(!res.ok){ const err = await res.json().catch(()=>({})); throw new Error(`Failed to save ${filename}: ${err.message || res.status}`); }
-      const json = await res.json();
-      return json.content.sha;
-    }
-    function setStatus(id, msg, ok){
-      const el = document.getElementById(id);
-      el.textContent = msg; el.className = 'status-msg ' + (ok===true?'ok':ok===false?'err':'');
+    async function saveAll(){
+      await window.localData.save({ courses, students, attendance, grades });
     }
 
-    async function loadAllData(){
-      const c = await ghGet('courses.json'); courses = c.data || []; shas.courses = c.sha;
-      const s = await ghGet('students.json'); students = s.data || []; shas.students = s.sha;
-      const a = await ghGet('attendance.json'); attendance = a.data || {}; shas.attendance = a.sha;
-      const g = await ghGet('grades.json'); grades = g.data || {}; shas.grades = g.sha;
-    }
     function courseKey(c){ return c.semester ? c.code + '::' + c.semester : c.code; }
     function studentInCourse(s, c){ return s.courseCode === courseKey(c) || s.courseCode === c.code; }
     function migrateCourseLinks(){
@@ -818,39 +777,6 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
         }
       });
     }
-
-    function showDashboard(){
-      document.getElementById('tbNotSigned').style.display = 'none';
-      document.getElementById('tbSignedIn').style.display = 'flex';
-      document.getElementById('tokenGate').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      migrateCourseLinks();
-      renderCourseFilter();
-      renderProfileList();
-    }
-
-    async function tryAutoConnect(){
-      const savedToken = localStorage.getItem('teacherToken');
-      if(!savedToken) return;
-      cfg = { ...REPO, token: savedToken };
-      try{
-        await loadAllData();
-        showDashboard();
-      }catch(e){
-        localStorage.removeItem('teacherToken');
-      }
-    }
-
-    window.connect = async () => {
-      cfg.token = document.getElementById('cfgToken').value.trim();
-      if(!cfg.token){ setStatus('connectStatus','Please enter a token.', false); return; }
-      setStatus('connectStatus','Connecting and loading data...');
-      try{
-        await loadAllData();
-        localStorage.setItem('teacherToken', cfg.token);
-        showDashboard();
-      }catch(e){ setStatus('connectStatus', e.message, false); }
-    };
 
     // ---------- Student profiles ----------
     function renderCourseFilter(){
@@ -961,7 +887,7 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
       students.splice(i,1);
       renderProfileList();
       try{
-        shas.students = await ghPut('students.json', students, shas.students, `Delete student ${s.id}`);
+        await saveAll();
       }catch(e){
         alert('Delete failed to save: ' + e.message);
       }
