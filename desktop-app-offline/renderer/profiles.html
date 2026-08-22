@@ -794,7 +794,9 @@ table.grid-table select, table.grid-table input { padding:6px 8px; font-size:0.8
         if(st==='present') present++; else if(st==='absent') absent++; else late++;
       });
       const total = present+absent+late;
-      return { present, absent, late, total, pct: total ? Math.round(present*100/total) : null };
+      // Late counts toward "present" for the attendance rate — it's not
+      // an absence. Present/Absent/Late are still tracked separately above.
+      return { present, absent, late, total, pct: total ? Math.round((present+late)*100/total) : null };
     }
     const PROFILE_PAGE_SIZE = 50;
     let profilePage = 1;
